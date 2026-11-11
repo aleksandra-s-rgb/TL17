@@ -27,7 +27,7 @@ jobs:
             npm run check
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: npm init playwright@latest
 
       - name: Run Playwright tests
         env:
