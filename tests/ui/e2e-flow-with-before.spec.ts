@@ -1,31 +1,69 @@
-import { test, expect } from '@playwright/test'
-import { LoginPage } from '../pages/login-page'
+import { test } from '@playwright/test'
 import { faker } from '@faker-js/faker/locale/en'
 import { PASSWORD, USERNAME } from '../../config/env-data'
+import { LoginPage } from '../../pom/pages/LoginPage'
+import { OrderPage } from '../../pom/pages/OrderPage'
 
 let loginPage: LoginPage
+let orderCreationPage: OrderPage
 
-test.beforeEach(async ({ page }) => {
-  loginPage = new LoginPage(page)
-  await loginPage.open()
-})
+test.describe('All tests', async () => {
+  test.beforeEach(async ({ page }) => {
+    loginPage = new LoginPage(page)
+    await loginPage.open()
+  })
+  test('TL-17.3 signIn button disabled when incorrect data inserted', async ({}) => {
+    await loginPage.usernameField.fill(faker.lorem.word(2))
+    await loginPage.passwordField.fill(faker.lorem.word(7))
+    await loginPage.signInButton.checkVisible(true)
+    await loginPage.signInButton.checkEnabled(false)
+  })
 
-test('signIn button disabled when incorrect data inserted', async ({}) => {
-  await loginPage.usernameField.fill(faker.lorem.word(2))
-  await loginPage.passwordField.fill(faker.lorem.word(7))
-  await expect(loginPage.signInButton).toBeDisabled()
-})
+  test('TL-17.4 error message displayed when incorrect credentials used', async ({}) => {
+    await loginPage.signIn(faker.lorem.word(2), faker.lorem.word(8))
+    await loginPage.errorPopup.checkVisible()
+  })
 
-test('error message displayed when incorrect credentials used', async ({}) => {
-  // implement test
-})
+  test('TL-17.5 login with correct credentials and verify order creation page', async ({
+    page,
+  }) => {
+    orderCreationPage = new OrderPage(page)
+    await loginPage.signIn(USERNAME, PASSWORD)
 
-test('login with correct credentials and verify order creation page', async ({}) => {
-  const orderCreationPage = await loginPage.signIn(USERNAME, PASSWORD)
-  await expect(orderCreationPage.statusButton).toBeVisible()
-  // verify at least few elements on the order creation page
-})
+    await orderCreationPage.statusButton.checkVisible()
+    await orderCreationPage.usernameField.checkVisible()
+    await orderCreationPage.phoneField.checkVisible()
+    await orderCreationPage.commentField.checkVisible()
+  })
 
-test('login and create order', async ({}) => {
-  // implement test
+  test('TL-17.6 login and create order', async ({ page }) => {
+    const order = new OrderPage(page)
+    await loginPage.signIn(USERNAME, PASSWORD)
+
+    await order.createOrder(
+      faker.lorem.word(2),
+      Number(faker.string.numeric(6)),
+      faker.lorem.word(2),
+    )
+  })
+
+  test('TL-17.7 errors during the order creation', async ({ page }) => {
+    const order = new OrderPage(page)
+    await loginPage.signIn(USERNAME, PASSWORD)
+
+    await loginPage.usernameField.fill(faker.lorem.word(1))
+    await order.nameFieldError.checkVisibleNameFieldError()
+
+    await order.phoneField.fill(faker.lorem.word(2))
+    await order.phoneFieldError.checkVisiblePhoneFieldError()
+  })
+
+  test('TL-17.8 log out from the platform', async ({ page }) => {
+    const order = new OrderPage(page)
+    await loginPage.signIn(USERNAME, PASSWORD)
+
+    await order.logOutButton.click()
+    await loginPage.checkLoginPageVisible(true)
+    await loginPage.signInButton.checkVisible(true)
+  })
 })
