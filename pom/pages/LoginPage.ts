@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test'
+import { expect, Locator, Page } from '@playwright/test'
 import { SERVICE_URL } from '../../config/env-data'
 import { Button } from '../atoms/Button'
 import { Error } from '../atoms/Error'
@@ -29,6 +29,11 @@ export class LoginPage {
     await this.usernameField.fill(username)
     await this.passwordField.fill(password)
     await this.signInButton.click()
+  }
+
+  async checkLoginPageVisible(visible = true): Promise<void> {
+    await expect(this.usernameField).toBeVisible({ visible: visible })
+    await expect(this.passwordField).toBeVisible({ visible: visible })
   }
 
   // continue with the rest of the implementation below

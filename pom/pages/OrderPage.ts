@@ -1,7 +1,8 @@
-import { Page } from '@playwright/test'
+import { Locator, Page } from '@playwright/test'
 import { Button } from '../atoms/Button'
 import { Input } from '../atoms/Input'
 import { Order } from '../atoms/Order'
+import { Error } from '../atoms/Error'
 
 export class OrderPage {
   readonly page: Page
@@ -11,6 +12,9 @@ export class OrderPage {
   readonly commentField: Input
   readonly orderButton: Button
   readonly orderPopup: Order
+  readonly nameFieldError: Error
+  readonly phoneFieldError: Error
+  readonly logOutButton: Button
   // add more locators here
 
   constructor(page: Page) {
@@ -21,6 +25,9 @@ export class OrderPage {
     this.commentField = new Input(page, 'comment-input')
     this.orderButton = new Button(page, 'createOrder-button')
     this.orderPopup = new Order(page, 'orderSuccessfullyCreated-popup')
+    this.nameFieldError = new Error(page, 'username-input-error')
+    this.phoneFieldError = new Error(page, 'phone-input-error')
+    this.logOutButton = new Button(page, 'logout-button')
   }
 
   async createOrder(username: string, phone: number, comment: string): Promise<void> {
