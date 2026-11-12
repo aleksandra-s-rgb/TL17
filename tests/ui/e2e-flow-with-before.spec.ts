@@ -67,7 +67,3 @@ test.describe('All tests', async () => {
     await loginPage.signInButton.checkVisible(true)
   })
 })
-
-
-
-
